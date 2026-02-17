@@ -415,6 +415,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.playTilePressAnim(tile);
+    this.playSelectSound();
 
     const selectedIndex = this.selectedTiles.findIndex((candidate) => candidate.id === tile.id);
     if (selectedIndex >= 0) {
@@ -1029,6 +1030,45 @@ export class GameScene extends Phaser.Scene {
       osc.start(start);
       osc.stop(start + 0.11);
     }
+  }
+
+  private playSelectSound(): void {
+    if (!this.popSoundEnabled) {
+      return;
+    }
+
+    const manager = this.sound as Phaser.Sound.WebAudioSoundManager;
+    const ctx = manager?.context;
+    if (!ctx) {
+      return;
+    }
+    if (ctx.state === 'suspended') {
+      void ctx.resume();
+    }
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    filter.type = 'highpass';
+    filter.frequency.value = 480;
+    filter.Q.value = 0.8;
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(460, now);
+    osc.frequency.exponentialRampToValueAtTime(320, now + 0.045);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.06, now + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.055);
   }
 
   private resetRunState(): void {

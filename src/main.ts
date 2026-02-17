@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { inject } from '@vercel/analytics';
 import './style.css';
 import { GAME_HEIGHT, GAME_WIDTH } from './consts';
 import { ExitScene } from './scenes/ExitScene';
@@ -17,3 +18,4 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 new Phaser.Game(config);
+inject();
