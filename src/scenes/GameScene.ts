@@ -211,7 +211,7 @@ export class GameScene extends Phaser.Scene {
     const urlParams = new URLSearchParams(window.location.search);
     const ref = urlParams.get('ref');
 
-    this.createPortalButton(290, 26, 'Vibe Jam Portal', () => {
+    this.createPortalButton(250, 10, 'Vibe Jam Portal', () => {
       const newParams = new URLSearchParams();
       newParams.append('portal', 'true');
       newParams.append('username', 'pop_tiles_player');
