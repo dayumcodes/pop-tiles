@@ -91,6 +91,7 @@ export class GameScene extends Phaser.Scene {
     this.highScore = Number(localStorage.getItem(HIGH_SCORE_KEY) ?? 0);
 
     this.createHud();
+    this.createPortals();
 
     this.grid = [];
     for (let row = 0; row < GRID_ROWS; row += 1) {
@@ -204,6 +205,67 @@ export class GameScene extends Phaser.Scene {
     const maskGraphics = this.make.graphics({ x: 0, y: 0 }, false);
     maskGraphics.fillRect(BOARD_X, BOARD_Y, GRID_COLS * TILE_SIZE, GRID_ROWS * TILE_SIZE);
     this.boardMask = maskGraphics.createGeometryMask();
+  }
+
+  private createPortals(): void {
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
+
+    this.createPortalButton(10, 80, 'Vibe Jam Portal', () => {
+      const newParams = new URLSearchParams();
+      newParams.append('portal', 'true');
+      newParams.append('username', 'pop_tiles_player');
+      newParams.append('color', 'blue');
+      newParams.append('speed', '10');
+
+      for (const [key, value] of urlParams) {
+        newParams.append(key, value);
+      }
+
+      const paramString = newParams.toString();
+      const nextPage = 'https://vibej.am/portal/2026' + (paramString ? '?' + paramString : '');
+      window.location.href = nextPage;
+    }, 0x00ff00);
+
+    if (ref) {
+      this.createPortalButton(10, 120, 'Return Portal', () => {
+        let url = ref;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+        const newParams = new URLSearchParams();
+        for (const [key, value] of urlParams) {
+            if (key !== 'ref') {
+                newParams.append(key, value);
+            }
+        }
+        const paramString = newParams.toString();
+        window.location.href = url + (paramString ? '?' + paramString : '');
+      }, 0xff0000);
+    }
+  }
+
+  private createPortalButton(x: number, y: number, label: string, onClick: () => void, color: number): Phaser.GameObjects.Container {
+    const container = this.add.container(x, y);
+    const width = 140;
+    const height = 30;
+
+    const bg = this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.8)
+      .setStrokeStyle(2, color, 1)
+      .setInteractive({ useHandCursor: true });
+
+    const text = this.add.text(width/2, height/2, label, {
+      fontFamily: HUD_FONT,
+      fontSize: '24px',
+      color: '#' + color.toString(16).padStart(6, '0'),
+    }).setOrigin(0.5).setScale(0.5);
+
+    bg.on('pointerdown', onClick);
+    bg.on('pointerover', () => bg.setFillStyle(0x333333, 0.8));
+    bg.on('pointerout', () => bg.setFillStyle(0x000000, 0.8));
+
+    container.add([bg, text]);
+    return container;
   }
 
   private createHud(): void {

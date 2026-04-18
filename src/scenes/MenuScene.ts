@@ -9,6 +9,12 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create(): void {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('portal') === 'true') {
+        this.scene.start('GameScene', { speedMode: 'score' });
+        return;
+    }
+
     this.cameras.main.setBackgroundColor('rgba(0,0,0,0)');
 
     const centerX = GAME_WIDTH / 2;
